@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            :root {
+                --glass: rgba(255, 255, 255, 0.1);
+            }
+            body {
+                margin: 0;
+                padding: 3rem 2rem;
+                background-color: #111;
+                color: white;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            }
+            .backdrop {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                z-index: -1;
+                background: radial-gradient(
+                        circle at 40% 20%,
+                        rgba(255, 140, 245, 0.03) 20%,
+                        transparent 40%
+                    ),
+                    radial-gradient(
+                        circle at 60% 50%,
+                        rgba(61, 177, 160, 0.05) 100%,
+                        transparent 40%
+                    ),
+                    radial-gradient(
+                        circle at 40% 60%,
+                        rgba(94, 35, 142, 0.03) 100%,
+                        transparent 40%
+                    ),
+                    radial-gradient(
+                        circle at 80% 20%,
+                        rgba(68, 37, 203, 0.05) 100%,
+                        transparent 40%
+                    );
+            }
+            * {
+                box-sizing: border-box;
+                scroll-behavior: smooth;
+                user-select: none;
+            }
+            h1 {
+                margin: 0 0 8px 0;
+                font-size: 24px;
+                font-weight: 600;
+            }
+            .stats {
+                margin: 0 0 1rem 0;
+                font-size: 14px;
+                font-weight: 400;
+                color: #ccc;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid var(--glass);
+            }
+            select {
+                font-family: inherit;
+                margin: 0 0 1rem 0;
+                padding: 0 10px 0 4px;
+                font-size: 14px;
+                font-weight: 400;
+                color: #ccc;
+                background-color: transparent;
+                border: 1.4px solid var(--glass);
+                border-radius: 6px;
+                outline: none;
+                cursor: pointer;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                box-shadow: none;
+            }
+            label {
+                font-size: 14px;
+                font-weight: 400;
+                color: #ccc;
+            }
+            .snapshots {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                grid-gap: 10px;
+            }
+            .snapshots .snapshot {
+                width: 100%;
+                height: 100%;
+                min-height: 190px;
+                cursor: pointer;
+                border-radius: 6px;
+                background-color: var(--glass);
+                transition: 0.4s;
+            }
+            .snapshots .snapshot:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+            .snapshots .snapshot img {
+                width: 100%;
+                height: auto;
+                object-fit: cover;
+            }
+            .snapshots .snapshot .timestamp {
+                margin: 6px 0 0 0;
+                padding: 0 10px;
+                font-size: 14px;
+                font-weight: 500;
+            }
+            .snapshots .snapshot .date {
+                display: block;
+                margin: 0 0 6px 0;
+                padding: 0 10px;
+                font-size: 12px;
+                font-weight: 400;
+                color: #ccc;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>All Snapshots</h1>
+        <label for="scale">View Mode</label>
+        <select name="scale" id="scale">
+            <option value="0.5">Min</option>
+            <option value="0.75">Compact</option>
+            <option value="1" selected>Default</option>
+            <option value="1.25">4x1</option>
+            <option value="1.5">3x1</option>
+            <option value="2">2x1</option>
+            <option value="3">Max</option>
+        </select>
+        <p class="stats"></p>
+        <div class="backdrop"></div>
+        <div class="snapshots"></div>
+        <script>
+            const scale = document.querySelector("#scale")
+            scale.addEventListener("input", () => {
+                document.querySelector(".snapshots").style.zoom = scale.value
+            })
+
+            function formatTimestamp(timestamp, timeOnly = false) {
+                const date = new Date(timestamp * 1000)
+                const options = { day: "numeric", month: "short", year: "numeric" }
+                const formattedDate = date.toLocaleDateString("en-US", options)
+                const timeOptions = {
+                    hour: "numeric",
+                    minute: "numeric",
+                    second: "numeric",
+                    hour12: true,
+                }
+                const formattedTime = date.toLocaleTimeString("en-US", timeOptions)
+                const now = Date.now()
+                const timeDifference = now - timestamp * 1000
+
+                const minuteMs = 60 * 1000
+                const hourMs = 60 * minuteMs
+                const dayMs = 24 * hourMs
+                const monthMs = 30 * dayMs
+                const yearMs = 365 * dayMs
+
+                let timeAgo
+                let unit
+
+                if (timeDifference < minuteMs) {
+                    timeAgo = Math.floor(timeDifference / 1000)
+                    unit = "s"
+                } else if (timeDifference < hourMs) {
+                    const minutes = Math.floor(timeDifference / minuteMs)
+                    const seconds = Math.floor((timeDifference % minuteMs) / 1000)
+                    timeAgo = `${minutes}m ${seconds}s`
+                    unit = ""
+                } else if (timeDifference < dayMs) {
+                    const hours = Math.floor(timeDifference / hourMs)
+                    const minutes = Math.floor((timeDifference % hourMs) / minuteMs)
+                    timeAgo = `${hours}hr ${minutes}m`
+                    unit = ""
+                } else if (timeDifference < monthMs) {
+                    timeAgo = Math.floor(timeDifference / dayMs)
+                    unit = "day"
+                } else if (timeDifference < yearMs) {
+                    timeAgo = Math.floor(timeDifference / monthMs)
+                    unit = "mth"
+                } else {
+                    timeAgo = Math.floor(timeDifference / yearMs)
+                    unit = "yr"
+                }
+                let formattedString = `
+    <p class="timestamp">${formattedTime} (${timeAgo}${unit} ago)</p>
+    <span class="date">${formattedDate}</span>`
+                if (timeOnly) formattedString = formattedTime
+                return formattedString
+            }
+
+            const gallery = document.querySelector(".snapshots")
+            fetch("snapshots/indexed.txt")
+                .then((response) => response.text())
+                .then((text) => text.split("\n"))
+                .then((lines) => {
+                    lines.pop()
+                    lines.reverse()
+
+                    document.querySelector(".stats").innerHTML = `
+                    Showing all ${lines.length} snapshots <br> 
+                    Last updated: ${formatTimestamp(lines[0].split(".").shift(), true)}.
+                    <span style="text-decoration: underline; cursor: pointer" onclick="window.location.reload()">Click to Refresh</span>
+                    `
+
+                    lines.forEach((file) => {
+                        const div = document.createElement("div")
+                        div.classList.add("snapshot")
+                        div.onclick = () => window.open(`snapshots/${file}`)
+
+                        const img = document.createElement("img")
+                        img.dataset.src = `snapshots/${file}`
+                        img.classList.add("lazy")
+
+                        gallery.appendChild(div)
+                        div.appendChild(img)
+                        div.innerHTML += formatTimestamp(file.split(".").shift())
+                    })
+
+                    const observerOptions = {
+                        root: null,
+                        rootMargin: "0px",
+                        threshold: 0.1,
+                    }
+
+                    const lazyLoad = (entries, observer) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target
+                                img.src = img.dataset.src
+                                img.classList.remove("lazy")
+                                img.onerror = () => img.parentElement.remove()
+                                observer.unobserve(img)
+                            }
+                        })
+                    }
+
+                    const observer = new IntersectionObserver(lazyLoad, observerOptions)
+                    const lazyImages = document.querySelectorAll("img.lazy")
+                    lazyImages.forEach((img) => observer.observe(img))
+                })
+        </script>
+    </body>
+</html>
