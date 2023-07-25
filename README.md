@@ -1,6 +1,4 @@
-<center>
-  <img src="docs/logo.png" alt="Snapshots Logo" width="150" height="150">
-</center>
+<img src="docs/logo.png" alt="Snapshots Logo" width="150" height="150">
 
 # Snapshots v2.0
 

@@ -134,6 +134,13 @@ const updateTrayMenu = () => {
     }))
 
     const contextMenu = Menu.buildFromTemplate([
+        {
+            label: "⏭️ Next",
+            click: () => {
+                const command = `osascript -e 'tell application "Spotify" to next track'`
+                exec(command, (error, stdout, stderr) => {})
+            },
+        },
         { label: "Snapshots v2.0", enabled: false },
         { label: `Snapshot coverage: ${calcTime} minutes`, enabled: false },
         { type: "separator" },
